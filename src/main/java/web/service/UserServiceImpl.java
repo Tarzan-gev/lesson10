@@ -1,6 +1,8 @@
 package web.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,11 +18,11 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-
     public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
+
     @Override
     @Transactional(readOnly = true)
     public List<User> getAllUsersWithRoles() {
@@ -37,7 +39,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public User getUserById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
     }
 
     @Override
@@ -56,7 +58,7 @@ public class UserServiceImpl implements UserService {
 
         existingUser.setName(user.getName());
         existingUser.setSurname(user.getSurname());
-        existingUser.setAge(user.getAge());  // 👈 ДОБАВЛЕНО!
+        existingUser.setAge(user.getAge());
         existingUser.setEmail(user.getEmail());
 
         if (user.getPassword() != null && !user.getPassword().isEmpty()
@@ -70,6 +72,7 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(existingUser);
     }
+
     @Override
     @Transactional
     public void deleteUser(Long id) {
@@ -89,7 +92,6 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email);
     }
 
-
     @Override
     @Transactional
     public void updateUser(Long id, String name, String surname, String email) {
@@ -98,5 +100,14 @@ public class UserServiceImpl implements UserService {
         user.setSurname(surname);
         user.setEmail(email);
         userRepository.save(user);
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public User getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmailWithRoles(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
 }

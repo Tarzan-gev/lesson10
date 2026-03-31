@@ -1,7 +1,9 @@
 package web.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
+
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -56,6 +58,7 @@ public class Role implements GrantedAuthority {
         this.name = name;
     }
 
+    @JsonIgnore
     public Set<User> getUsers() {
         return users;
     }

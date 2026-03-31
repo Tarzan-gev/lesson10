@@ -1,12 +1,11 @@
 package web.service;
 
-import org.springframework.stereotype.Service;
 import web.model.User;
 
 import java.util.List;
 import java.util.Optional;
 
-@Service
+
 public interface UserService {
     List<User> getAllUsers();
 
@@ -24,6 +23,7 @@ public interface UserService {
 
     Optional<User> findByEmail(String email);
 
-
     void updateUser(Long id, String name, String surname, String email);
+
+    User getCurrentUser();
 }
