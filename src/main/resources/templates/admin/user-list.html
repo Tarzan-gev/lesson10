@@ -374,24 +374,25 @@
                 // 5. Email
                 row.insertCell(4).textContent = user.email || '';
 
-                // 6. Role — улучшенная обработка ролей
+                // 6. Role — корректная обработка ролей
                 let rolesText = '';
+
+                // Проверяем разные возможные поля с ролями
                 if (user.roles) {
-                    if (Array.isArray(user.roles)) {
-                        rolesText = user.roles
-                            .map(role => {
-                                // Пробуем разные поля с названием роли
-                                const roleName = role.name || role.authority || '';
-                                // Убираем префикс ROLE_, если есть
-                                return roleName.replace('ROLE_', '');
-                            })
-                            .filter(role => role && role.trim() !== '') // Убираем пустые строки
-                            .join(' ');
-                    } else {
-                        // Если roles не массив (например, строка или объект)
-                        rolesText = String(user.roles).replace('ROLE_', '');
-                    }
+                    // Если есть поле roles (массив объектов с полем name)
+                    rolesText = user.roles
+                        .map(role => role.name.replace('ROLE_', ''))
+                        .join(' ');
+                } else if (user.authorities) {
+                    // Если есть поле authorities (массив объектов с полем authority)
+                    rolesText = user.authorities
+                        .map(auth => auth.authority.replace('ROLE_', ''))
+                        .join(' ');
+                } else {
+                    // Если нет ни одного из полей — ставим заглушку
+                    rolesText = 'N/A';
                 }
+
                 row.insertCell(5).textContent = rolesText;
 
                 // 7. Edit button
